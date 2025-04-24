@@ -35,4 +35,32 @@ class UserController extends Controller
             'token' => $token,
         ], 201);    
     }
+
+    public function login(Request $request)
+    {
+        $request = Validate([ 
+            'email' => 'required|email',
+            'password' => 'required|min:8|max:15',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user) {
+            return response()->json(['errors'=>'Invalid Email'], 401);
+        }
+        elseif (Hash::check($request->password, $user->password)) {
+            return response()->json(['errors'=>'Invalid credentials'], 401);
+        }
+
+        $token = JWtAuth::fromUser($user);
+
+        return response()->json(['message' => 'Login successfully', 
+            'user' => $user->makeHidden(['password']),
+            'token' => $token,
+        ], 201);    
+    }
+
+    
+
+
 }
