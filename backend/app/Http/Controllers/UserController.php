@@ -60,7 +60,27 @@ class UserController extends Controller
         ], 201);    
     }
 
-    
+    public function dashboard(request $request)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+        } 
+        catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+            return response()->json(['error' => 'Token Invalid'], 401);
+        }
+        catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+            return response()->json(['error' => 'Token Expired'], 401);
+        }
+        catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+            return response()->json(['error' => 'Token absent'], 401);
+        }
+
+        return response()->json(['message' => 'Login successfully', 
+            'user' => $user,
+            'message' => 'Welcome to your dashboard',
+        ], 201); 
+
+    }
 
 
 }
