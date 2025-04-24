@@ -95,6 +95,7 @@ class UserController extends Controller
         catch (\Tymon\JWTAuth\Exceptions\TokenException $e) {
             return response()->json(['error' => 'Token Invalid'], 401);
         }
+       
         
 
 
