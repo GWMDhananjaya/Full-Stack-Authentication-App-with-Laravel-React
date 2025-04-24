@@ -9,7 +9,7 @@ use Tymon\JWTAuth\Contracts\JWTAuth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 
-class UserController extends Controller
+class UsersController extends Controller
 {
     public function register(Request $request)
     {
@@ -45,7 +45,7 @@ class UserController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if ($user) {
+        if (!$user) {
             return response()->json(['errors'=>'Invalid Email'], 401);
         }
         elseif (Hash::check($request->password, $user->password)) {
