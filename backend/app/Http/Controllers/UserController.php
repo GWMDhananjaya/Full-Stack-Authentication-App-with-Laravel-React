@@ -81,6 +81,23 @@ class UserController extends Controller
         ], 201); 
 
     }
+    public function logout(Request $request)
+    {
+        try {
+            $token = JWTAuth::getToken();
+            if(!$token) {
+                return response()->json(['error' => 'Token not provided'], 401);
+            }
 
+            JWTAuth::invalidate($token);
+            return response()->json(['message' => 'Logout successfully'], 401);
+            }
+        catch (\Tymon\JWTAuth\Exceptions\TokenException $e) {
+            return response()->json(['error' => 'Token Invalid'], 401);
+        }
+        
+
+
+    }
 
 }
