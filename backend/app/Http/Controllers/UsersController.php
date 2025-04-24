@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Tymon\JWTAuth\Contracts\JWTSubject;
-use Tymon\JWTAuth\Contracts\JWTAuth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 
@@ -37,30 +37,33 @@ class UsersController extends Controller
     }
 
     public function login(Request $request)
-    {
-        $request = Validate([ 
-            'email' => 'required|email',
-            'password' => 'required|min:8|max:15',
-        ]);
+{
+    // Validate the request
+    $validated = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|min:8|max:15',
+    ]);
 
-        $user = User::where('email', $request->email)->first();
+    // Find the user
+    $user = User::where('email', $validated['email'])->first();
 
-        if (!$user) {
-            return response()->json(['errors'=>'Invalid Email'], 401);
-        }
-        elseif (Hash::check($request->password, $user->password)) {
-            return response()->json(['errors'=>'Invalid credentials'], 401);
-        }
-
-        $token = JWtAuth::fromUser($user);
-
-        return response()->json(['message' => 'Login successfully', 
-            'user' => $user->makeHidden(['password']),
-            'token' => $token,
-        ], 201);    
+    // Check if user exists and password matches
+    if (!$user || !Hash::check($validated['password'], $user->password)) {
+        return response()->json(['errors' => 'Invalid credentials'], 401);
     }
 
-    public function dashboard(request $request)
+    // Generate JWT token
+    $token = JWTAuth::fromUser($user);
+
+    // Return response
+    return response()->json([
+        'message' => 'Login successful',
+        'user' => $user->makeHidden(['password']),
+        'token' => $token,
+    ], 200);
+}
+
+    public function dashboard(Request $request)
     {
         try {
             $user = JWTAuth::parseToken()->authenticate();
