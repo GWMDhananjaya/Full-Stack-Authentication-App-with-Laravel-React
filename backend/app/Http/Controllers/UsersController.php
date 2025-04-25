@@ -63,45 +63,38 @@ class UsersController extends Controller
     ], 200);
 }
 
-    public function dashboard(Request $request)
-    {
-        try {
-            $user = JWTAuth::parseToken()->authenticate();
-        } 
-        catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-            return response()->json(['error' => 'Token Invalid'], 401);
-        }
-        catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-            return response()->json(['error' => 'Token Expired'], 401);
-        }
-        catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
-            return response()->json(['error' => 'Token absent'], 401);
-        }
-
-        return response()->json(['message' => 'Login successfully', 
-            'user' => $user,
-            'message' => 'Welcome to your dashboard',
-        ], 201); 
-
+public function dashboard(Request $request)
+{
+     try {
+        $user = JWTAuth::parseToken()->authenticate();
+    } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+        return response()->json(['error' => 'Token is expired'], 401);
+    } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+        return response()->json(['error' => 'Token is invalid'], 401);
+    } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+        return response()->json(['error' => 'Token not provided'], 401);
     }
-    public function logout(Request $request)
-    {
-        try {
-            $token = JWTAuth::getToken();
-            if(!$token) {
-                return response()->json(['error' => 'Token not provided'], 401);
-            }
 
-            JWTAuth::invalidate($token);
-            return response()->json(['message' => 'Logout successfully'], 401);
-            }
-        catch (\Tymon\JWTAuth\Exceptions\TokenException $e) {
-            return response()->json(['error' => 'Token Invalid'], 401);
+     return response()->json([
+        'user' => $user,
+        'message' => 'Welcome to your dashboard'
+    ]);
+}
+public function logout(Request $request)
+{
+    try {
+         $token = JWTAuth::getToken();
+
+        if (!$token) {
+            return response()->json(['error' => 'Token not provided'], 401);
         }
-       
-        
 
+         JWTAuth::invalidate($token);
 
+        return response()->json(['message' => 'Logged out successfully']);
+    } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+        return response()->json(['error' => 'Failed to log out'], 500);
     }
+}   
 
 }
